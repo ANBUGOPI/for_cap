@@ -50,6 +50,36 @@ modules:
     - npm install
     - npm run build:cf
     supported-platforms: []
+- name: sample-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: sample-destination-service
+    parameters:
+      content-target: true
+  - name: sample-repo-host
+    parameters:
+      service-key:
+        name: sample-repo-host-key
+  - name: uaa_sample
+    parameters:
+      service-key:
+        name: uaa_sample-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: Approuter_sample_repo_host
+          ServiceInstanceName: sample-html5-srv
+          ServiceKeyName: sample-repo-host-key
+          sap.cloud.service: Approuter
+        - Authentication: OAuth2UserTokenExchange
+          Name: Approuter_uaa_sample
+          ServiceInstanceName: sample-xsuaa-service
+          ServiceKeyName: uaa_sample-key
+          sap.cloud.service: Approuter
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
 resources:
 - name: hdi_db
   type: com.sap.xs.hdi-container
@@ -65,20 +95,18 @@ resources:
   type: org.cloudfoundry.managed-service
   parameters:
     config:
-      HTML5Runtime_enabled: false
-      init_data:
-        instance:
-          destinations:
-          - Authentication: NoAuthentication
-            Name: ui5
-            ProxyType: Internet
-            Type: HTTP
-            URL: https://ui5.sap.com
-          existing_destinations_policy: update
+      HTML5Runtime_enabled: true
       version: 1.0.0
     service: destination
     service-name: sample-destination-service
     service-plan: lite
+- name: uaa_sample
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: sample-xsuaa-service
+    service-plan: application
 parameters:
   deploy_mode: html5-repo
   enable-parallel-deployments: true
